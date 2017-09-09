@@ -10,12 +10,12 @@ PUCHAR	extract_rsrc(LPWSTR rname)
 	FINDRESOURCE	findres;
 	LOCKRESOURCE	lockres;
 	LOADRESOURCE	loadres;
-//	DECOMPRESSBUFF	decomp;
+	DECOMPRESSBUFF	decomp;
 	ULONG		size;
 	ULONG		csize;
-//	ULONG		fsize;
+	ULONG		fsize;
 	PUCHAR		out;		
-int x;	
+	
 	if (!(findres = (FINDRESOURCE)resolve_symbol(&g_fonctions[4])))
 		return (NULL);
 	if (!(hres = findres(NULL, rname, RT_RCDATA)))
@@ -31,23 +31,12 @@ int x;
 	size = *(ULONG *)res;
 	csize = *(ULONG *)(res + 4);
 	res = res + 8;
-/*	if (!(decomp = (DECOMPRESSBUFF)resolve_symbol(&g_fonctions[7])))
-		return (NULL);*/
+	if (!(decomp = (DECOMPRESSBUFF)resolve_symbol(&g_fonctions[7])))
+		return (NULL);
 	if (!(out = (PUCHAR)malloc(sizeof(UCHAR) * size))) // Fucking bad leaks above
 		return (NULL);
-	/*if ((*/x = uncompress(out, &size, res, csize);//))
-	//{
-		printf("%d\n", x);
-		if (x != Z_OK)
-		{
-			if (x == Z_DATA_ERROR)
-				printf("Data corrupted!\n");
-			printf("uncompress failed!\n");
-			return (NULL);
-		}
-	//}
-/*	if (decomp(COMPRESSION_FORMAT_LZNT1, out, size, res, csize, &fsize))
-		return (NULL);*/
+	if (decomp(COMPRESSION_FORMAT_LZNT1, out, size, res, csize, &fsize))
+		return (NULL);
 	return (out);
 }
 

@@ -28,11 +28,11 @@ $(RSRC): %.o : %.rc
 
 $(OBJ) : %.o: %.c
 	@printf "[+] Current $<                                              \r"
-	@$(CC) $(CFLAGS) -Itools/compression/include -I$(INC) -c $< -o $@
+	@$(CC) $(CFLAGS) -I$(INC) -c $< -o $@
 
 $(NAME): $(OBJ) $(RSRC)
 	@printf "[+] Linking all together...                        		\n"
-	@$(CC) -static -L. $(CFLAGS) -o $(NAME) $(OBJ) $(RSRC) -lz 
+	@$(CC) $(CFLAGS) -o $(NAME) $(OBJ) $(RSRC)
 	@printf "[+] Done! \n"
 
 clean:
