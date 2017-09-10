@@ -80,7 +80,7 @@ int	write_rsrc(t_origpe *pe, t_comppe *cpe, char *out)
 
 	hdr.origsize = pe->size;
 	hdr.compsize = cpe->size;
-	if ((fd = open(out, O_RDWR /*| O_BINARY*/ | O_CREAT | O_TRUNC)) < 0)
+	if ((fd = open(out, O_RDWR /*| O_BINARY*/ | O_CREAT | O_TRUNC, 0666)) < 0)
 	{
 		printf("[!] Can't open %s for writing!\n", out);
 		return (0);
@@ -102,11 +102,20 @@ int	main(int argc, char **argv)
 		return (0);
 	}
 	if (!(pe = read_binary_intobuffer(argv[1])))
+	{
 		printf("[!] Cannot read bin!\n");
+		return (EXIT_FAILURE);
+	}
 	if (!(cpe = compress_bin(pe)))
+	{
 		printf("[!] Cannot compress bin!\n");
+		return (EXIT_FAILURE);
+	}
 	if (!(write_rsrc(pe, cpe, argv[2])))
+	{
 		printf("[!] Cannot write resource file\n");
+		return (EXIT_FAILURE);
+	}
 	free(pe->buffer);
 	free(cpe->compbuffer);
 	return (0);

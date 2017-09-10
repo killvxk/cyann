@@ -1,0 +1,20 @@
+#!/bin/sh
+
+TOOLSDIR=$(pwd)/tools
+RESDIR=$(pwd)/res
+
+if [ -z "$1" ]
+then
+	echo "[!] Please supply the path to the exec to patch"
+	exit
+fi
+echo "[.] Nanomiting the executable..."
+$TOOLSDIR/mite.py $1 >>/dev/null
+echo "[+] Generated $1-mited and $1-table"
+echo "[.] Compressing mited exec and nanomite table ..."
+$TOOLSDIR/creatersrc $1-mited $RESDIR/x32.res
+$TOOLSDIR/creatersrc $1-table $RESDIR/nm32.res
+echo "[.] Making and linking everything ..."
+make
+echo "[+] Executable nanomited and packed!"
+rm $1-mited $1-table

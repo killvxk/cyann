@@ -39,5 +39,6 @@ clean:
 	@rm $(NAME)
 	@rm src/*.o
 	@rm res/*.o
+	@rm res/*.res
 
 re: clean all
