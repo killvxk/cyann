@@ -28,11 +28,11 @@ $(RSRC): %.o : %.rc
 
 $(OBJ) : %.o: %.c
 	@printf "[+] Current $<                                              \r"
-	@$(CC) $(CFLAGS) -I$(INC) -c $< -o $@
+	@$(CC) -I$(CFLAGS) -I$(INC) -c $< -o $@
 
 $(NAME): $(OBJ) $(RSRC)
 	@printf "[+] Linking all together...                        		\n"
-	@$(CC) $(CFLAGS) -o $(NAME) $(OBJ) $(RSRC)
+	@$(CC) -Ltools $(CFLAGS) -o $(NAME) $(OBJ) $(RSRC) -lz
 	@printf "[+] Done! \n"
 
 clean:
