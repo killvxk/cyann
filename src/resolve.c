@@ -1,57 +1,75 @@
 #include "cyann.h"
 
-DWORD get_exported_symbol(DWORD baseaddr, DWORD symbolhash)
+CINT get_exported_symbol(CINT baseaddr, CINT symbolhash)
 {
-        DWORD   export_directory_table;
-        DWORD   name;
-        DWORD   nameptr;
-        DWORD   nbname;
+	PIMAGE_NT_HEADERS64	nthdr;
+	PIMAGE_EXPORT_DIRECTORY	exportdirectory;
+	PDWORD			address;
+	PDWORD			name;
+	PWORD 			ordinal;
+	DWORD			i;
+
+	nthdr = (PIMAGE_NT_HEADERS64)(((PIMAGE_DOS_HEADER)baseaddr)->e_lfanew + baseaddr);
+	exportdirectory = (PIMAGE_EXPORT_DIRECTORY)((LPBYTE)baseaddr+nthdr->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress); 
+	address=(PDWORD)((LPBYTE)baseaddr+exportdirectory->AddressOfFunctions);
+	name=(PDWORD)((LPBYTE)baseaddr+exportdirectory->AddressOfNames);
+	ordinal=(PWORD)((LPBYTE)baseaddr+exportdirectory->AddressOfNameOrdinals);
+	for(i=0;i<exportdirectory->AddressOfFunctions;i++)
+	{
+		if(shash((char*)baseaddr+name[i]) == symbolhash)
+            		return (CINT)((LPBYTE)baseaddr+address[ordinal[i]]);
+    	}
+ 	return (0);
+	/*CINT   export_directory_table;
+        CINT   name;
+        CINT   nameptr;
+        CINT   nbname;
         SHORT   address;
 
         if (baseaddr && symbolhash)
         {
-                export_directory_table = *(DWORD *)(baseaddr + PE_HEADER_OFFSET);
-                export_directory_table = (*(DWORD *)(export_directory_table + baseaddr + IMAGE_EXPORT_DIRECTORY_OFFSET)) + baseaddr;
-                nbname = *(DWORD *)(export_directory_table + NUMBER_OF_NAME_OFFSET);
-                nameptr = (*(DWORD *)(export_directory_table + ADDRESS_OF_NAME_OFFSET)) + baseaddr;
+                export_directory_table = *(CINT *)(baseaddr + PE_HEADER_OFFSET);
+		export_directory_table = (*(CINT *)(export_directory_table + baseaddr + IMAGE_EXPORT_DIRECTORY_OFFSET)) + baseaddr;
+                nbname = *(CINT *)(export_directory_table + NUMBER_OF_NAME_OFFSET);
+                nameptr = (*(CINT *)(export_directory_table + ADDRESS_OF_NAME_OFFSET)) + baseaddr;
                 while (nbname)
                 {
-                        name = (*(DWORD *) (nameptr + nbname * 4)) + baseaddr;
+                        name = (*(CINT *) (nameptr + nbname * 4)) + baseaddr;
                         if (shash((char *)name) == symbolhash)
                         {
-                                nameptr = (*(DWORD *)(export_directory_table + ADDRESSOFNAMEORDINAL_OFFSET)) + baseaddr;
-                                address = (SHORT) (*(DWORD *)(nameptr + nbname * 2));
-                                export_directory_table = (*(DWORD*)(export_directory_table + ADDRESSOFFUNCTION_OFFSET)) + baseaddr;
-                                return ((*(DWORD *)(export_directory_table + address * 4)) + baseaddr);
+                                nameptr = (*(CINT *)(export_directory_table + ADDRESSOFNAMEORDINAL_OFFSET)) + baseaddr;
+                                address = (SHORT) (*(CINT *)(nameptr + nbname * 2));
+                                export_directory_table = (*(CINT*)(export_directory_table + ADDRESSOFFUNCTION_OFFSET)) + baseaddr;
+                                return ((*(CINT *)(export_directory_table + address * 4)) + baseaddr);
                         }
                         nbname--;
                 }
         }
-        return (0);
+        return (0);*/
 }
 
-DWORD   get_dllbase_by_peb(DWORD peb, DWORD modulehash)
+CINT   get_dllbase_by_peb(CINT peb, CINT modulehash)
 {
-        DWORD   head;
-        DWORD   last;
+        CINT   head;
+        CINT   last;
         PWSTR   fullmodulename;
 
         if (peb && modulehash)
         {
-                head = *(DWORD *)((*(DWORD*)(peb + PEB_LDR_DATA_OFFSET)) + INMEMORYORDERMODULELIST_OFFSET);
-                last = *(DWORD *)(head + 4);
-                while (last != head)
+                head = *(CINT *)((*(CINT*)(peb + PEB_LDR_DATA_OFFSET)) + INMEMORYORDERMODULELIST_OFFSET);
+		last = *(CINT *)(head + sizeof(PVOID));
+		while (last != head)
                 {
-                        fullmodulename = (PWSTR)(*(DWORD *)(head + FULLDLLNAME_OFFSET));
-                        if (whash(_wcslwr(fullmodulename)) == modulehash)
-                                return (*(DWORD *)(head + DLLBASE_OFFSET));
-                        head = *(DWORD *)(head);
+                        fullmodulename = (PWSTR)(*(CINT *)(head + FULLDLLNAME_OFFSET));
+			if (whash(_wcslwr(fullmodulename)) == modulehash)
+                                return (*(CINT *)(head + DLLBASE_OFFSET));
+                        head = *(CINT *)(head);
                 }
         }
         return (0);
 }
 
-DWORD   resolve_symbol(t_fonction *fct)
+CINT   resolve_symbol(t_fonction *fct)
 {
         if (g_module[fct->index].addr == 0)
         {

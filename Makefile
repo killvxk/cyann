@@ -1,5 +1,11 @@
-CC=i686-w64-mingw32-gcc
-WINDRES=i686-w64-mingw32-windres
+CC=$(PREFIXCC)-w64-mingw32-gcc
+ifeq ($(PREFIXCC),x86_64)
+	LIBZ=-lz64
+else
+	LIBZ=-lz
+endif
+STRIP=$(PREFIXCC)-w64-mingw32-strip
+WINDRES=$(PREFIXCC)-w64-mingw32-windres
 CFLAGS=-Wall -Wextra -Werror
 SRCD=src
 OBJD=obj
@@ -32,13 +38,17 @@ $(OBJ) : %.o: %.c
 
 $(NAME): $(OBJ) $(RSRC)
 	@printf "[+] Linking all together...                        		\n"
-	@$(CC) -Ltools $(CFLAGS) -o $(NAME) $(OBJ) $(RSRC) -lz
+	@$(CC) -Ltools $(CFLAGS) -o $(NAME) $(OBJ) $(RSRC) $(LIBZ)
+	@printf "[+] Striping binary \n"
+	@$(STRIP) -s $(NAME)
 	@printf "[+] Done! \n"
 
 clean:
-	@rm $(NAME)
 	@rm src/*.o
 	@rm res/*.o
 	@rm res/*.res
+
+fclean: clean
+	@rm $(NAME)
 
 re: clean all

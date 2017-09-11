@@ -1,6 +1,6 @@
 # include "cyann.h"
 
-DWORD		g_peb = 0;
+CINT		g_peb = 0;
 t_nanomite	*g_ntable = NULL;
 
 t_module	g_module[NBMODULE] =

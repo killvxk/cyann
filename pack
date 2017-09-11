@@ -8,6 +8,13 @@ then
 	echo "[!] Please supply the path to the exec to patch"
 	exit
 fi
+ARCH=$(file $1 | grep PE32+)
+if [ -z "$ARCH" ]
+then
+	PREFIXMGW=i686
+else
+	PREFIXMGW=x86_64
+fi
 echo "[.] Nanomiting the executable..."
 $TOOLSDIR/mite.py $1 >>/dev/null
 echo "[+] Generated $1-mited and $1-table"
@@ -15,6 +22,7 @@ echo "[.] Compressing mited exec and nanomite table ..."
 $TOOLSDIR/creatersrc $1-mited $RESDIR/x32.res
 $TOOLSDIR/creatersrc $1-table $RESDIR/nm32.res
 echo "[.] Making and linking everything ..."
-make
+make PREFIXCC=$PREFIXMGW
 echo "[+] Executable nanomited and packed!"
 rm $1-mited $1-table
+make clean

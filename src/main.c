@@ -3,7 +3,7 @@
 
 DWORD	shash(char *s)
 {
-	DWORD   i;
+	CINT   i;
 
         i = 0;
         while (*s)
@@ -16,7 +16,7 @@ DWORD	shash(char *s)
 
 DWORD	whash(PWSTR s)
 {
-	DWORD	i;
+	CINT	i;
 
 	i = 0;
 	while (*s)
@@ -28,22 +28,21 @@ DWORD	whash(PWSTR s)
 }
 
 
-void	get_peb(DWORD *peb)
+void	get_peb(CINT *peb)
 {
 	if (peb)
-		asm("push %%fs:0x18\n"
-		"mov (%%esp), %%eax\n"
-            	"pop %%ebx\n"
-            	"mov 0x30(%%eax), %0"
-		: "=a"(*peb) :
-		);
+	#if defined(_WIN64)
+ 		*peb = __readgsqword( 0x60 );
+	#else
+	 	*peb = __readfsdword( 0x30 );
+	#endif
 }
 
 LPWSTR	get_me(void)
 {
 	WCHAR			buffer[MAX_PATH];
 	LPWSTR			str;
-	DWORD			size;
+	CINT			size;
 	GETMODULEFILENAME	getfn;
 
 	if (!(getfn = (GETMODULEFILENAME)resolve_symbol(&g_fonctions[16])))
@@ -67,6 +66,7 @@ int main(void)
 	get_peb(&g_peb);
 	if (!(memyselfandi = get_me()))
 		return (1);
+	printf("Haven't seg!\n");
 	g_ntable = make_nanomited_table(rsrc);
 	if ((bin = extract_rsrc(resid)))
 	{
