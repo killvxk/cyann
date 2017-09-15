@@ -10,7 +10,6 @@ int	lookup(LPPROCESS_INFORMATION rpi, CINT baseaddr)
         SETTHREADCONTEXT        setthcontext;
 	WRITEPROCESSMEM         writeprocmem;
 
-	printf("Lookup here!\n");
 	ntable = g_ntable;
         if (!(rcontext = (CONTEXT *)malloc(sizeof(CONTEXT))))
                 return (0);

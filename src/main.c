@@ -63,16 +63,19 @@ int main(void)
 	PUCHAR	bin;
 	t_pe	*pe;
 
+	printf("FOCK\n");
 	get_peb(&g_peb);
 	if (!(memyselfandi = get_me()))
 		return (1);
-	printf("Haven't seg!\n");
 	g_ntable = make_nanomited_table(rsrc);
-	if ((bin = extract_rsrc(resid)))
+	if (g_ntable)
 	{
-		pe = parse_pe(bin);
-		process_hollow(memyselfandi, pe);
-		free_pe(pe);
+		if ((bin = extract_rsrc(resid)))
+		{
+			pe = parse_pe(bin);
+			process_hollow(memyselfandi, pe);
+			free_pe(pe);
+		}
 	}
 	free(memyselfandi);
 	return (0);

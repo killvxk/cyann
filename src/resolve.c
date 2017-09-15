@@ -2,50 +2,24 @@
 
 CINT get_exported_symbol(CINT baseaddr, CINT symbolhash)
 {
-	PIMAGE_NT_HEADERS64	nthdr;
+	PIMAGE_NT_HEADERS	nthdr;
 	PIMAGE_EXPORT_DIRECTORY	exportdirectory;
 	PDWORD			address;
 	PDWORD			name;
 	PWORD 			ordinal;
 	DWORD			i;
 
-	nthdr = (PIMAGE_NT_HEADERS64)(((PIMAGE_DOS_HEADER)baseaddr)->e_lfanew + baseaddr);
-	exportdirectory = (PIMAGE_EXPORT_DIRECTORY)((LPBYTE)baseaddr+nthdr->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress); 
-	address=(PDWORD)((LPBYTE)baseaddr+exportdirectory->AddressOfFunctions);
-	name=(PDWORD)((LPBYTE)baseaddr+exportdirectory->AddressOfNames);
-	ordinal=(PWORD)((LPBYTE)baseaddr+exportdirectory->AddressOfNameOrdinals);
-	for(i=0;i<exportdirectory->AddressOfFunctions;i++)
+	nthdr = (PIMAGE_NT_HEADERS)(((PIMAGE_DOS_HEADER)baseaddr)->e_lfanew + baseaddr);
+	exportdirectory = (PIMAGE_EXPORT_DIRECTORY)(baseaddr+nthdr->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress); 
+	address=(PDWORD)(baseaddr+exportdirectory->AddressOfFunctions);
+	name=(PDWORD)(baseaddr+exportdirectory->AddressOfNames);
+	ordinal=(PWORD)(baseaddr+exportdirectory->AddressOfNameOrdinals);
+	for(i=0;i<exportdirectory->NumberOfNames;i++)
 	{
 		if(shash((char*)baseaddr+name[i]) == symbolhash)
-            		return (CINT)((LPBYTE)baseaddr+address[ordinal[i]]);
+            		return (CINT)(baseaddr+address[ordinal[i]]);
     	}
  	return (0);
-	/*CINT   export_directory_table;
-        CINT   name;
-        CINT   nameptr;
-        CINT   nbname;
-        SHORT   address;
-
-        if (baseaddr && symbolhash)
-        {
-                export_directory_table = *(CINT *)(baseaddr + PE_HEADER_OFFSET);
-		export_directory_table = (*(CINT *)(export_directory_table + baseaddr + IMAGE_EXPORT_DIRECTORY_OFFSET)) + baseaddr;
-                nbname = *(CINT *)(export_directory_table + NUMBER_OF_NAME_OFFSET);
-                nameptr = (*(CINT *)(export_directory_table + ADDRESS_OF_NAME_OFFSET)) + baseaddr;
-                while (nbname)
-                {
-                        name = (*(CINT *) (nameptr + nbname * 4)) + baseaddr;
-                        if (shash((char *)name) == symbolhash)
-                        {
-                                nameptr = (*(CINT *)(export_directory_table + ADDRESSOFNAMEORDINAL_OFFSET)) + baseaddr;
-                                address = (SHORT) (*(CINT *)(nameptr + nbname * 2));
-                                export_directory_table = (*(CINT*)(export_directory_table + ADDRESSOFFUNCTION_OFFSET)) + baseaddr;
-                                return ((*(CINT *)(export_directory_table + address * 4)) + baseaddr);
-                        }
-                        nbname--;
-                }
-        }
-        return (0);*/
 }
 
 CINT   get_dllbase_by_peb(CINT peb, CINT modulehash)
