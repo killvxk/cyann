@@ -63,7 +63,6 @@ int main(void)
 	PUCHAR	bin;
 	t_pe	*pe;
 
-	printf("FOCK\n");
 	get_peb(&g_peb);
 	if (!(memyselfandi = get_me()))
 		return (1);
