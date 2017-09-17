@@ -19,7 +19,8 @@
 	# define INMEMORYORDERMODULELIST_OFFSET 0x20
 	# define FULLDLLNAME_OFFSET             0x50
 	# define DLLBASE_OFFSET                 0x20
-	# define GPR_BX 			Rcx
+	# define GPR_BX 			Rbx
+	# define GPR_AX				Rax
 	# define R_IP				Rip
 	# define R_SP				Rsp
 # else
@@ -28,7 +29,8 @@
 	# define INMEMORYORDERMODULELIST_OFFSET 0x14
 	# define FULLDLLNAME_OFFSET             0x28
 	# define DLLBASE_OFFSET                 0x10
-	# define GPR_BX 			Ecx
+	# define GPR_AX				Eax
+	# define GPR_BX 			Ebx
 	# define R_IP				Eip
 	# define R_SP				Esp
 # endif

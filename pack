@@ -1,5 +1,11 @@
 #!/bin/sh
 
+banner(){
+echo -n "X19fX19fX19fX19fX18uX19fLiAgX19fX18gICAgX19fX19fXyAgICBfX19fX19fICAgClxfICAgX19fIFxfXyAgfCAgIHwgLyAgXyAgXCAgIFwgICAgICBcICAgXCAgICAgIFwgIAovICAgIFwgIFwvLyAgIHwgICB8LyAgL19cICBcICAvICAgfCAgIFwgIC8gICB8ICAgXCAKXCAgICAgXF9fX1xfX19fICAgLyAgICB8ICAgIFwvICAgIHwgICAgXC8gICAgfCAgICBcCiBcX19fX19fICAvIF9fX19fX1xfX19ffF9fICAvXF9fX198X18gIC9cX19fX3xfXyAgLwogICAgICAgIFwvXC8gICAgICAgICAgICAgIFwvICAgICAgICAgXC8gICAgICAgICBcLyAKICAgICAgICAgICAgUEUzMi9QRTMyKysgTmFub21pdGUgUGFja2VyCg==" | base64 -d
+echo " "
+}
+
+
 TOOLSDIR=$(pwd)/tools
 RESDIR=$(pwd)/res
 
@@ -15,6 +21,7 @@ then
 else
 	PREFIXMGW=x86_64
 fi
+banner
 echo "[.] Nanomiting the executable..."
 $TOOLSDIR/mite.py $1 >>/dev/null
 echo "[+] Generated $1-mited and $1-table"

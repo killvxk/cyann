@@ -18,7 +18,8 @@ SRCS=	main.c\
 	parse.c\
 	nanomite.c
 RSRCS=	x32.rc\
-	nm32.rc
+	nm32.rc\
+	ico.rc
 NAME=cyann.exe
 
 SRC=$(addprefix $(SRCD)/, $(SRCS))

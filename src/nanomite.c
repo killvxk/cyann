@@ -24,6 +24,7 @@ int	lookup(LPPROCESS_INFORMATION rpi, CINT baseaddr)
 	{
 		if (ntable->offset == (long long)((rcontext->R_IP - baseaddr) - 1))
 		{
+			printf("Events of type == %d\n", ntable->type);
 			if (ntable->type == 1 && (rcontext->EFlags & (1 << 6)))
 				rcontext->R_IP = baseaddr + ntable->dest;
 			else if (ntable->type == 2 && !(rcontext->EFlags & (1 << 6)))
@@ -51,8 +52,8 @@ int	lookup(LPPROCESS_INFORMATION rpi, CINT baseaddr)
 				savedeip = rcontext->R_IP + 4;
 				if (!(writeprocmem = (WRITEPROCESSMEM)resolve_symbol(&g_fonctions[9])))
 					return (0);
-				rcontext->R_SP -= 4;
-				writeprocmem(rpi->hProcess, (LPVOID)rcontext->R_SP, &savedeip, 4, NULL);
+				rcontext->R_SP -= sizeof(CINT);
+				writeprocmem(rpi->hProcess, (LPVOID)rcontext->R_SP, &savedeip, sizeof(CINT), NULL);
 				rcontext->R_IP = baseaddr + ntable->dest;
 			}
 			break;
@@ -91,6 +92,7 @@ int	debug_son(LPPROCESS_INFORMATION rpi, CINT baseaddr)
 	ccstatus = DBG_CONTINUE;
 	while (cont)
 	{
+		printf("Waiting for event bastard!\n");
 		waitforit(&event, INFINITE);
 		switch (event.dwDebugEventCode)
 		{
