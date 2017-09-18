@@ -4,14 +4,13 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <windows.h>
+# include "resource.h"
 # include "fake_winhdr.h"
 
 # define NBMODULE 2
 # define NBFONCTION 17
 
 # define PE_HEADER_OFFSET		0x3c
-
-# define X32 999
 
 # if defined __x86_64__
 	typedef DWORD64	CINT;
@@ -75,11 +74,12 @@ extern t_nanomite	*g_ntable;
 
 DWORD		shash(char *s);
 DWORD		whash(PWSTR s);
+void		get_peb(CINT *peb);
 CINT		resolve_symbol(t_fonction *fct);
 int		process_hollow(WCHAR *legitproc, t_pe *pe);
 int		debug_son(LPPROCESS_INFORMATION rpi, CINT baseaddr);
-PUCHAR		extract_rsrc(LPWSTR rname);
-t_nanomite      *make_nanomited_table(LPWSTR rsrc);
+PUCHAR		extract_rsrc(WORD id);
+t_nanomite      *make_nanomited_table(WORD id);
 t_pe		*parse_pe(PUCHAR in);
 void		free_pe(t_pe *pe);
 

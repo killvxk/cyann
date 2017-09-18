@@ -31,11 +31,11 @@ all: $(NAME)
 
 $(RSRC): %.o : %.rc
 	@printf "[+] Making rsrc $<                                                         \r"
-	@$(WINDRES) $< $@
+	@$(WINDRES) -J rc -O coff -I$(INC) -i $< -o $@
 
 $(OBJ) : %.o: %.c
 	@printf "[+] Current $<                                              \r"
-	@$(CC) -I$(CFLAGS) -I$(INC) -c $< -o $@
+	@$(CC) $(CFLAGS) -I$(INC) -c $< -o $@
 
 $(NAME): $(OBJ) $(RSRC)
 	@printf "[+] Linking all together...                        		\n"

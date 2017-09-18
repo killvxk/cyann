@@ -2,7 +2,7 @@
 #include "api_function.h"
 #include "zlib.h"
 
-PUCHAR	extract_rsrc(LPWSTR rname)
+PUCHAR	extract_rsrc(WORD id)
 {
 	HRSRC		hres;
 	HGLOBAL		hglob;
@@ -10,15 +10,13 @@ PUCHAR	extract_rsrc(LPWSTR rname)
 	FINDRESOURCE	findres;
 	LOCKRESOURCE	lockres;
 	LOADRESOURCE	loadres;
-//	DECOMPRESSBUFF	decomp;
 	ULONG		size;
 	ULONG		csize;
-//	ULONG		fsize;
 	PUCHAR		out;		
 	
 	if (!(findres = (FINDRESOURCE)resolve_symbol(&g_fonctions[4])))
 		return (NULL);
-	if (!(hres = findres(NULL, rname, RT_RCDATA)))
+	if (!(hres = findres(NULL, MAKEINTRESOURCE(id), RT_RCDATA)))
 		return (NULL);
 	if (!(loadres = (LOADRESOURCE)resolve_symbol(&g_fonctions[5])))
 		return (NULL);
@@ -31,8 +29,6 @@ PUCHAR	extract_rsrc(LPWSTR rname)
 	size = *(ULONG *)res;
 	csize = *(ULONG *)(res + 4);
 	res = res + 8;
-	/*if (!(decomp = (DECOMPRESSBUFF)resolve_symbol(&g_fonctions[7])))
-		return (NULL);*/
 	if (!(out = (PUCHAR)malloc(sizeof(UCHAR) * size))) // Fucking bad leaks above
 		return (NULL);
 	if (uncompress(out, &size, res, csize) != Z_OK)
@@ -40,8 +36,6 @@ PUCHAR	extract_rsrc(LPWSTR rname)
 		free(out);
 		return (NULL);
 	}
-/*	if (decomp(COMPRESSION_FORMAT_LZNT1, out, size, res, csize, &fsize))
-		return (NULL);*/
 	return (out);
 }
 

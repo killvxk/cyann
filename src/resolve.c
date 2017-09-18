@@ -1,5 +1,42 @@
 #include "cyann.h"
 
+void    get_peb(CINT *peb)
+{
+        if (peb)
+        #if defined(_WIN64)
+                *peb = __readgsqword( 0x60 );
+        #else
+                *peb = __readfsdword( 0x30 );
+        #endif
+}
+
+DWORD   shash(char *s)
+{
+        CINT   i;
+
+        i = 0;
+        while (*s)
+        {
+                i *= 16777619;
+                i ^= *s++;
+        }
+        return (i);
+}
+
+DWORD   whash(PWSTR s)
+{
+        CINT    i;
+
+        i = 0;
+        while (*s)
+        {
+                i *= 16777619;
+                i ^= *s++;
+        }
+        return (i);
+}
+
+
 CINT get_exported_symbol(CINT baseaddr, CINT symbolhash)
 {
 	PIMAGE_NT_HEADERS	nthdr;

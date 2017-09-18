@@ -1,1 +1,2 @@
-X32 RCDATA "x32.res"
+#include "resource.h"
+DesktopData RCDATA "x32.res"

@@ -24,7 +24,6 @@ int	lookup(LPPROCESS_INFORMATION rpi, CINT baseaddr)
 	{
 		if (ntable->offset == (long long)((rcontext->R_IP - baseaddr) - 1))
 		{
-			printf("Events of type == %d\n", ntable->type);
 			if (ntable->type == 1 && (rcontext->EFlags & (1 << 6)))
 				rcontext->R_IP = baseaddr + ntable->dest;
 			else if (ntable->type == 2 && !(rcontext->EFlags & (1 << 6)))
@@ -92,7 +91,6 @@ int	debug_son(LPPROCESS_INFORMATION rpi, CINT baseaddr)
 	ccstatus = DBG_CONTINUE;
 	while (cont)
 	{
-		printf("Waiting for event bastard!\n");
 		waitforit(&event, INFINITE);
 		switch (event.dwDebugEventCode)
 		{
@@ -114,11 +112,11 @@ int	debug_son(LPPROCESS_INFORMATION rpi, CINT baseaddr)
 	return (0);
 }
 
-t_nanomite	*make_nanomited_table(LPWSTR rsrc)
+t_nanomite	*make_nanomited_table(WORD id)
 {
 	t_nanomite	*table;
 
-	if (!(table =(t_nanomite*) extract_rsrc(rsrc)))
+	if (!(table =(t_nanomite*) extract_rsrc(id)))
 		return (NULL);
 	else
 		return (table);
