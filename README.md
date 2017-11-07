@@ -1,5 +1,11 @@
-### CYAN
-PoC Nanomite packer for PE32/PE32++
+______________.___.  _____    _______    _______   
+\_   ___ \__  |   | /  _  \   \      \   \      \  
+/    \  \//   |   |/  /_\  \  /   |   \  /   |   \ 
+\     \___\____   /    |    \/    |    \/    |    \
+ \______  / ______\____|__  /\____|__  /\____|__  /
+        \/\/              \/         \/         \/ 
+###      PoC Nanomite packer for PE32/PE32++ 
+
 
 For packing a PE32 exec ==
 - Under Linux cd to the cyann dir, then ```./pack /path/to/my.exe```
