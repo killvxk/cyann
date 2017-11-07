@@ -51,27 +51,28 @@ void    get_peb(DWORD *peb)
                 );
 }
 
-
 DWORD list_and_print(DWORD baseaddr, WCHAR *dllname)
 {
-        DWORD   export_directory_table;
-        DWORD   name;
-        DWORD   nameptr;
-        DWORD   nbname;
-        SHORT   address;
+        PIMAGE_NT_HEADERS       nthdr;
+        PIMAGE_EXPORT_DIRECTORY exportdirectory;
+        PDWORD                  address;
+        PDWORD                  name;
+        char			*n0;
+	PWORD                   ordinal;
+        DWORD                   i;
 
-        if (baseaddr)
+        nthdr = (PIMAGE_NT_HEADERS)(((PIMAGE_DOS_HEADER)baseaddr)->e_lfanew + baseaddr);
+        exportdirectory = (PIMAGE_EXPORT_DIRECTORY)(baseaddr+nthdr->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+        address=(PDWORD)(baseaddr+exportdirectory->AddressOfFunctions);
+        name=(PDWORD)(baseaddr+exportdirectory->AddressOfNames);
+        ordinal=(PWORD)(baseaddr+exportdirectory->AddressOfNameOrdinals);
+        for(i=0;i<exportdirectory->NumberOfNames;i++)
         {
-                export_directory_table = *(DWORD *)(baseaddr + PE_HEADER_OFFSET);
-                export_directory_table = (*(DWORD *)(export_directory_table + baseaddr + IMAGE_EXPORT_DIRECTORY_OFFSET)) + baseaddr;
-                nbname = *(DWORD *)(export_directory_table + NUMBER_OF_NAME_OFFSET);
-                nameptr = (*(DWORD *)(export_directory_table + ADDRESS_OF_NAME_OFFSET)) + baseaddr;
-                while (nbname)
-                {
-                        name = (*(DWORD *) (nameptr + nbname * 4)) + baseaddr;
-                        printf("%S -> %d =>%s -> %d\n", dllname, whash(dllname), (char *)name, shash((char *)name));
-                        nbname--;
-                }
+		n0 = (char*)baseaddr+name[i];
+		if (dllname)
+			printf("%S -> %d =>%s -> %d\n", dllname, whash(dllname), n0, shash(n0));
+		else
+			printf("%s -> %d\n", n0, shash(n0));
         }
         return (0);
 }
@@ -97,10 +98,21 @@ DWORD   list(DWORD peb)
         return (0);
 }
 
-int	main(void)
+int	main(int argc, char **argv)
 {
-	DWORD peb = 0;
-	get_peb(&peb);
-	list(peb);
+	if (argc == 1)
+	{
+		DWORD peb = 0;
+		get_peb(&peb);
+		list(peb);
+	}
+	HANDLE lib = LoadLibrary(argv[1]);
+	if (lib)
+	{
+		printf("Lib at %p\n", lib);
+		list_and_print((DWORD)lib, NULL);
+	}
+	else
+		printf("Can't load lib!\n");
 	return (0);
 }
