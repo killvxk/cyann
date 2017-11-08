@@ -12,7 +12,7 @@ README will be updated with better explanation about how it work. Instead of wai
 
 Under Linux cd to the cyann dir, then ```./pack /path/to/my.exe```
 
-Dependance:
+Dependances:
 - mingw for linux (i686 and x86_64)  
 - python2 with capstone and pefile module  
 
