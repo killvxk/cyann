@@ -16,4 +16,4 @@ Dependances:
 - mingw for linux (i686 and x86_64)  
 - python2 with capstone and pefile module  
 
-Is it just a PoC, can (and will) be greatly improved. 
+It is just a PoC, can (and will) be greatly improved. 
