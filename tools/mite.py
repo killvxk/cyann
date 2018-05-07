@@ -4,6 +4,7 @@ import pefile
 from struct import pack as p
 from capstone import *
 import sys
+import random
 
 topatch = ["je", "jne", "jmp", "jg", "jge", "ja", "jae", "jl", "jle", "jb", "jbe", "call"]
 
@@ -29,6 +30,9 @@ md = Cs(CS_ARCH_X86, arch)
 nw = ""
 addr = pe.sections[index].VirtualAddress
 jmptable = []
+f = 0
+r = 0
+j = 0
 for i in md.disasm(textsec,0):
 	insb = ''.join(format(x, '02x') for x in i.bytes)
 	if i.mnemonic in topatch:
@@ -42,9 +46,19 @@ for i in md.disasm(textsec,0):
 			insb = nwinsb
 			typ = gettype(i.mnemonic)
 			jmptable.append(p("<Q", addr + i.address) + p("<Q", typ) + dest)
+			r += 1
 		except:
 			print "Wont patch"
+	else:
+		if j % 2 == 0:
+			jmptable.append(p("<Q", addr + i.address) + p("<Q", random.randint(0, len(topatch))) + p("<Q", addr + random.randint(0, len(textsec))))
+			f += 1
 	nw += insb
+	j += 1
+
+print "Added "+str(r)+" nanomites"
+print "Added "+str(f)+" fake-nanomites"
+
 jmptable.append(p("<Q", 0) * 3)
 table= "".join(jmptable)
 pe.set_bytes_at_rva(addr, nw.decode('hex'))

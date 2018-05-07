@@ -39,7 +39,7 @@ t_origpe	*read_binary_intobuffer(char *path)
 	if (stat(path, &st))
 		return (NULL);
 	pe->size = st.st_size;
-	if ((fd = open(path, O_RDONLY /*| O_BINARY*/)) <= 0)
+	if ((fd = open(path, O_RDONLY | O_BINARY)) <= 0)
 		return (NULL);
 	if (!(pe->buffer = (unsigned char *)malloc(sizeof(unsigned char) * pe->size)))
 		return (NULL);
@@ -80,7 +80,7 @@ int	write_rsrc(t_origpe *pe, t_comppe *cpe, char *out)
 
 	hdr.origsize = pe->size;
 	hdr.compsize = cpe->size;
-	if ((fd = open(out, O_RDWR /*| O_BINARY*/ | O_CREAT | O_TRUNC, 0666)) < 0)
+	if ((fd = open(out, O_RDWR | O_BINARY | O_CREAT | O_TRUNC, 0666)) < 0)
 	{
 		printf("[!] Can't open %s for writing!\n", out);
 		return (0);

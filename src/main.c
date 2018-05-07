@@ -26,6 +26,10 @@ int main(void)
 	PUCHAR	bin;
 	t_pe	*pe;
 
+#ifdef CYANNDBG
+	printf("{!} DEBUG MODE\n");
+#endif
+
 	get_peb(&g_peb);
 	if (!(memyselfandi = get_me()))
 		return (1);
@@ -39,6 +43,10 @@ int main(void)
 			free_pe(pe);
 		}
 	}
+#ifdef CYANNDBG
+	else
+		printf("{!} make_nanomited_table failed\n");
+#endif
 	free(memyselfandi);
 	return (0);
 }

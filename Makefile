@@ -6,7 +6,7 @@ else
 endif
 STRIP=$(PREFIXCC)-w64-mingw32-strip
 WINDRES=$(PREFIXCC)-w64-mingw32-windres
-CFLAGS=-Wall -Wextra -Werror
+CFLAGS=-Wall -Wextra -Werror -DCYANNDBG
 SRCD=src
 OBJD=obj
 RSRCD=res

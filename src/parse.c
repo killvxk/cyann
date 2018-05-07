@@ -27,12 +27,15 @@ PUCHAR	extract_rsrc(WORD id)
 	if (!(res = lockres(hglob)))
 		return (NULL);
 	size = *(ULONG *)res;
-	csize = *(ULONG *)(res + 4);
-	res = res + 8;
+	csize = *(ULONG *)(res + 8);
+	res = res + 16;
 	if (!(out = (PUCHAR)malloc(sizeof(UCHAR) * size))) // Fucking bad leaks above
 		return (NULL);
 	if (uncompress(out, &size, res, csize) != Z_OK)
 	{
+#ifdef CYANNDBG
+                printf("{!} zlib uncompress failed!\n");
+#endif
 		free(out);
 		return (NULL);
 	}

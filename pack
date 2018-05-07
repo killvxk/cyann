@@ -23,7 +23,7 @@ else
 fi
 banner
 echo "[.] Nanomiting the executable..."
-$TOOLSDIR/mite.py $1 >>/dev/null
+$TOOLSDIR/mite.py $1 #>>/dev/null
 echo "[+] Generated $1-mited and $1-table"
 echo "[.] Compressing mited exec and nanomite table ..."
 $TOOLSDIR/creatersrc $1-mited $RESDIR/x32.res
